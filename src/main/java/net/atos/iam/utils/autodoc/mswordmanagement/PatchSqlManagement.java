@@ -94,10 +94,7 @@ public class PatchSqlManagement extends AutoDocUtils {
 		}
 		
 		window.close();
-		
-	     //TODO Modifier le contenu des scripts 
 		//TODO  Factoriser ce qui peut etre factorisé 
-		
 	}
 
 	private void generateManuel(TextBox referenceJira, TextBox versionDocument, List<String> checkedItems,
