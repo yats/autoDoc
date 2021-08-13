@@ -1,140 +1,42 @@
 package net.atos.iam.utils.autodoc.mswordmanagement;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import org.apache.poi.xwpf.usermodel.TOC;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtBlock;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSimpleField;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STOnOff;
 import org.springframework.stereotype.Component;
 
+import com.googlecode.lanterna.gui2.ComboBox;
+import com.googlecode.lanterna.gui2.TextBox;
+
+import net.atos.iam.utils.autodoc.AutoDocApplication;
+import net.atos.iam.utils.autodoc.common.AutoDocUtils;
+import net.atos.iam.utils.autodoc.mswordmanagement.constantes.DocumentTypes;
+
 @Component
-public class FunctionalSpecificationManagement {
+public class FunctionalSpecificationManagement extends AutoDocUtils{
 
+	public void generateDocument(ComboBox<String> typeDocument, TextBox titreDocument, TextBox referenceJira,
+			TextBox versionDocument, ComboBox<String> chefProjetSI) throws FileNotFoundException, IOException, URISyntaxException {
 
-    /**
-     * 
-     * Add a mapping of the paragraphs to remove
-     * 
-     * @param doc
-     * @param paragraphTitle
-     */
-    public void removeParagrah(XWPFDocument doc, String paragraphTitle) {
+		String formattedDate = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
 
-    	doc.getParagraphs().forEach(p -> {
-    		System.out.println("--------- Paragraph text ---------");
-    		System.out.println(p.getParagraphText());
-    		System.out.println("--------- Paragraph body ---------");
-    		System.out.println(p.getBody());
-    		System.out.println("--------- Paragraph position ---------");
-    		System.out.println(doc.getPosOfParagraph(p));
-    		
-    	});
-    	
-    	//28, 29, 30, 31
-    	
-    	doc.removeBodyElement(24);
-    	doc.removeBodyElement(25);
-    	
-    }
-    
-    
-   public void createTOC(XWPFDocument doc,int paragraphPosition) {
-	   
-	   CTP ctP = doc.getParagraphArray(paragraphPosition).getCTP();
-	   CTSimpleField toc = ctP.addNewFldSimple();
-	   toc.setInstr("TOC \\o \"1-2\" \\h \\z \\u");
-	   toc.setDirty(STOnOff.ON);
-	   
-   }
-
-    public void replaceTextFor(XWPFDocument doc, String findText, String replaceText){
-
-        replaceTextInParagraphs(doc, findText, replaceText);
-
-        replaceTextInTables(doc, findText, replaceText);
-
-        replaceTextinHeader(doc, findText, replaceText);
-
-    }
-
-
-	private void replaceTextinHeader(XWPFDocument doc, String findText, String replaceText) {
-		doc.getHeaderList().forEach(header -> {
-            header.getParagraphs().forEach(p ->{
-                p.getRuns().forEach(run -> {
-                    String text = run.text();
-                    if(text.contains(findText)) {
-                        run.setText(text.replace(findText, replaceText), 0);
-                    } 
-                });
-            });
-
-            header.getTables().forEach(t-> {
-                t.getRows().forEach(row -> {
-                    row.getTableCells().forEach(cell -> {
-                        cell.getParagraphs().forEach( p -> {
-                            p.getRuns().forEach(run -> {
-                                String text = run.text();
-                                if(text.contains(findText)) {
-                                    run.setText(text.replace(findText, replaceText), 0);
-                                } 
-                            });  
-                        });
-                    });
-                });
-            });
-
-        });
+		String resourcePath = "template\\templateFC.docx";
+		XWPFDocument doc = new XWPFDocument(Files.newInputStream(Paths.get(AutoDocApplication.class.getClassLoader().getResource(resourcePath).toURI())));
+		this.replaceTextFor(doc, "{TITRE}", titreDocument.getText());
+		this.replaceTextFor(doc, "{ID_JIRA}", referenceJira.getText());
+		this.replaceTextFor(doc, "{CP_SI}", chefProjetSI.getText());
+		this.replaceTextFor(doc, "{CP_PRESTATAIRE}", "Y.AMRI");
+		this.replaceTextFor(doc, "{DATE}", formattedDate);
+		this.createTOC(doc, 18);
+		this.saveDocument("C:\\tmp\\TMA_GRC_" + DocumentTypes.getDocumentTypeFromDesc(typeDocument.getText()).getSigle()
+				+ "_" + referenceJira.getText() + "_" + titreDocument.getText() + "_V" + versionDocument.getText()
+				+ ".docx", doc);
 	}
-
-
-	private void replaceTextInTables(XWPFDocument doc, String findText, String replaceText) {
-		doc.getTables().forEach(t-> {
-            t.getRows().forEach(row -> {
-                row.getTableCells().forEach(cell -> {
-                    cell.getParagraphs().forEach( p -> {
-                        p.getRuns().forEach(run -> {
-                            String text = run.text();
-                            if(text.contains(findText)) {
-                                run.setText(text.replace(findText, replaceText), 0);
-                            } 
-                        });  
-                    });
-                });
-            });
-        });
-	}
-
-
-	private void replaceTextInParagraphs(XWPFDocument doc, String findText, String replaceText) {
-		doc.getParagraphs().forEach(p ->{
-            p.getRuns().forEach(run -> {
-                String text = run.text();
-                if(text.contains(findText)) {
-                    run.setText(text.replace(findText, replaceText), 0);
-                } 
-            });
-        });
-	}
-
-	public void saveDocument(String filePath, XWPFDocument doc) throws FileNotFoundException, IOException{
-        FileOutputStream out = null;
-        try{
-            out = new FileOutputStream(filePath);
-            doc.write(out);
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        finally{
-            out.close();
-        }
-    }
 
 }
