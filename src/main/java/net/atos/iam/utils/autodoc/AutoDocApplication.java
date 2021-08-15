@@ -17,7 +17,6 @@ import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.gui2.Separator;
-import com.googlecode.lanterna.gui2.TextBox;
 import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.screen.Screen;
@@ -25,10 +24,8 @@ import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
-import net.atos.iam.utils.autodoc.mswordmanagement.PatchSqlManagement;
 import net.atos.iam.utils.autodoc.mswordmanagement.constantes.DocumentConstantes;
 import net.atos.iam.utils.autodoc.mswordmanagement.constantes.DocumentTypes;
-import net.atos.iam.utils.autodoc.mswordmanagement.constantes.MTProjectManagers;
 import net.atos.iam.utils.layout.GrcAutoDocPanel;
 
 @Service
@@ -52,32 +49,10 @@ public class AutoDocApplication {
 			Panel contentPanel = new Panel(new GridLayout(2));
 
 			List<String> listDocuments = DocumentTypes.getEnumDescAsList();
-			List<String> listChefProjets = MTProjectManagers.getEnumDescAsList();
-
 			contentPanel.addComponent(new Label(DocumentConstantes.TYPE));
 			ComboBox<String> typeDocument = new ComboBox<>(listDocuments);
 			typeDocument.setReadOnly(false).setLayoutData(GridLayout.createHorizontallyFilledLayoutData(1));
 			contentPanel.addComponent(typeDocument);
-
-			TextBox titreDocument = new TextBox();
-			titreDocument.setLayoutData(GridLayout.createHorizontallyFilledLayoutData(1));
-			contentPanel.addComponent(new Label(DocumentConstantes.TITLE));
-			contentPanel.addComponent(titreDocument);
-
-			TextBox referenceJira = new TextBox();
-			titreDocument.setLayoutData(GridLayout.createHorizontallyFilledLayoutData(1));
-			contentPanel.addComponent(new Label(DocumentConstantes.REFERENCE_JIRA));
-			contentPanel.addComponent(referenceJira);
-
-			TextBox versionDocument = new TextBox();
-			versionDocument.setLayoutData(GridLayout.createHorizontallyFilledLayoutData(1));
-			contentPanel.addComponent(new Label(DocumentConstantes.VERSION));
-			contentPanel.addComponent(versionDocument);
-
-			contentPanel.addComponent(new Label(DocumentConstantes.MT_PROJECT_MANAGER));
-			ComboBox<String> chefProjetSI = new ComboBox<>(listChefProjets);
-			typeDocument.setReadOnly(false).setLayoutData(GridLayout.createHorizontallyFilledLayoutData(1));
-			contentPanel.addComponent(chefProjetSI);
 
 			contentPanel.addComponent(new EmptySpace().setLayoutData(GridLayout.createHorizontallyFilledLayoutData(2)));
 			contentPanel.addComponent(new Separator(Direction.HORIZONTAL)
@@ -87,17 +62,12 @@ public class AutoDocApplication {
 				public void run() {
 					
 					GrcAutoDocPanel panel = new GrcAutoDocPanelFactory().createPanel(typeDocument.getText());
-					panel.init();
+					panel.init(window);
 					panel.addComponents();
 					window.setComponent((Component) panel);
 					textGUI.addWindowAndWait(window);
-					
 					try {
-						PatchSqlManagement docManagement = new PatchSqlManagement();
-						docManagement.generateDocument(typeDocument, titreDocument, referenceJira, versionDocument,
-								chefProjetSI, panel.getCkeckedItems(),window);
-
-
+						panel.generateDocuments();
 					} catch (Exception e) {
                       log.error("Erreur lors de la creation du panel ", e);
 					}
