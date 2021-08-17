@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 public enum DocumentTypes {
 
 	SPEC_GENERALE("SPEC_GENERALE","Spécification générale","SFD"),
+	GUIDE_UTILISATEUR("GUIDE_UTILISATEUR","Guide utilisateur","GU"),
 	FICHE_RELECTURE("FICHE_RELECTURE","Fiche de relecture","FR"),
 	PATCH_SQL("PATCH_SQL","Patch SQL","PQ"),
 	MANUEL_EXPLOITATION("MANUEL_EXPLOITATION","Manuel d'exploitation","ME");
