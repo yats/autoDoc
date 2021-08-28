@@ -4,19 +4,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSimpleField;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STOnOff;
 import org.springframework.stereotype.Component;
 
-import net.atos.iam.utils.autodoc.AutoDocApplication;
+import com.aspose.cells.ReplaceOptions;
+import com.aspose.cells.Workbook;
 
 @Component
 public class AutoDocUtils {
@@ -25,13 +26,13 @@ public class AutoDocUtils {
 
 	public void logParagraphs(XWPFDocument doc) {
 		doc.getParagraphs().forEach(p -> {
-			log.info("--------- Paragraph text ---------");
-			log.info(p.getParagraphText());
-			log.info("--------- Paragraph body ---------");
-			log.info(p.getBody());
-			log.info("--------- Paragraph position ---------");
-			log.info(doc.getPosOfParagraph(p));
-
+			System.out.println("###########################################");
+			System.out.println("--------- Paragraph position ---------");
+			System.out.println(doc.getPosOfParagraph(p));
+			System.out.println("--------- Paragraph text ---------");
+			System.out.println(p.getParagraphText());
+			System.out.println("--------- Paragraph body ---------");
+			System.out.println(p.getBody());
 		});
 	}
 	
@@ -140,6 +141,16 @@ public class AutoDocUtils {
 		} finally {
 			out.close();
 		}
+	}
+	
+	
+	public void replaceTextInExcel(Workbook doc, String findText, String replaceText) {
+		
+		ReplaceOptions replace = new ReplaceOptions();
+		replace.setCaseSensitive(false);
+		replace.setMatchEntireCellContents(false);
+		doc.replace(findText,replaceText, replace);
+
 	}
 	
 	public void deleteDocument(String filePath) {

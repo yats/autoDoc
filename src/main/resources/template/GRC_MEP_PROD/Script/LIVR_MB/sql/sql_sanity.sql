@@ -1,0 +1,3 @@
+@../sql/GRC_BD_MB_SANITY_TESTS_{REF_LIVRAISON}.sql
+
+exit

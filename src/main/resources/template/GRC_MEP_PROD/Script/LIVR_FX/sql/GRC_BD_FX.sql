@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------------------------*/
 /*
 /*  Type             : Requete SQL
-/*  Nom              : {ID_JIRA}
+/*  Nom              : {REF_LIVRAISON}
 /*  Auteur           : {CP_PRESTATAIRE}
 /*  Création         : {DATE}
 /*  Description      : 

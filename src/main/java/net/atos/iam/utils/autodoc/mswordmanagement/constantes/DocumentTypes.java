@@ -10,6 +10,16 @@ public enum DocumentTypes {
 	GUIDE_UTILISATEUR("GUIDE_UTILISATEUR","Guide utilisateur","GU"),
 	FICHE_RELECTURE("FICHE_RELECTURE","Fiche de relecture","FR"),
 	PATCH_SQL("PATCH_SQL","Patch SQL","PQ"),
+	LIVRAISON_PROD("LIVRAISON_PROD","Livraison prod","LIVR_PROD"),
+	DEMANDE_ACCES_UNIX("DEMANDE_ACCES_UNIX","Demande d'accès compte Unix","DAU"),
+	DEMANDE_ACCES_VPN("DEMANDE_ACCES_VPN","Demande d'accès VPN","DAV"),
+	COMPTE_RENDU_REUNION("COMPTE_RENDU_REUNION","Compte rendu réunion","CR"),
+	SPEC_TECHNIQUE_WS_SOAP("SPEC_TECHNIQUE_WS_SOAP","Spéc technique ws soap","ST"),
+	CAHIER_TEST("CAHIER_TEST","Cahier de test","CT"),
+	GRILLE_ESTIMATION("GRILLE_ESTIMATION","Grille d'estimation","GE"),
+	MACRO_CHIFFRAGE("MACRO_CHIFFRAGE","Macro chiffrage","MC"),
+	CHIFFRAGE_FC("CHIFFRAGE_FC","Chiffrage évolution","CH"),
+	CHIFFRAGE_DI("CHIFFRAGE_DI","Chiffrage DI","DI"),
 	MANUEL_EXPLOITATION("MANUEL_EXPLOITATION","Manuel d'exploitation","ME");
 
 	private final String documentCd;
