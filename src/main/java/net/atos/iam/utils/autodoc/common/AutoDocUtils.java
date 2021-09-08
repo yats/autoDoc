@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSimpleField;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STOnOff;
@@ -69,9 +71,11 @@ public class AutoDocUtils {
 		replaceTextInTables(doc, findText, replaceText);
 
 		replaceTextinHeader(doc, findText, replaceText);
+		
+		replaceTextinFooter(doc, findText, replaceText);
 
 	}
-
+	
 	private void replaceTextinHeader(XWPFDocument doc, String findText, String replaceText) {
 		
 		doc.getHeaderList().forEach(header -> {
@@ -101,8 +105,38 @@ public class AutoDocUtils {
 
 		});
 	}
+	
+	private void replaceTextinFooter(XWPFDocument doc, String findText, String replaceText) {
+		
+		doc.getFooterList().forEach(header -> {
+			header.getParagraphs().forEach(p -> {
+				p.getRuns().forEach(run -> {
+					String text = run.text();
+					if (text.contains(findText)) {
+						run.setText(text.replace(findText, replaceText), 0);
+					}
+				});
+			});
 
-	private void replaceTextInTables(XWPFDocument doc, String findText, String replaceText) {
+			header.getTables().forEach(t -> {
+				t.getRows().forEach(row -> {
+					row.getTableCells().forEach(cell -> {
+						cell.getParagraphs().forEach(p -> {
+							p.getRuns().forEach(run -> {
+								String text = run.text();
+								if (text.contains(findText)) {
+									run.setText(text.replace(findText, replaceText), 0);
+								}
+							});
+						});
+					});
+				});
+			});
+
+		});
+	}
+
+	protected void replaceTextInTables(XWPFDocument doc, String findText, String replaceText) {
 		doc.getTables().forEach(t -> {
 			t.getRows().forEach(row -> {
 				row.getTableCells().forEach(cell -> {
@@ -118,6 +152,7 @@ public class AutoDocUtils {
 			});
 		});
 	}
+	
 
 	private void replaceTextInParagraphs(XWPFDocument doc, String findText, String replaceText) {
 		doc.getParagraphs().forEach(p -> {
@@ -142,6 +177,23 @@ public class AutoDocUtils {
 			out.close();
 		}
 	}
+	
+    protected static void showTablesInfo( XWPFDocument document ) {
+        List<XWPFTable> tables = document.getTables();
+        System.out.println( "\n document has " + tables.size() + " table(s)." );
+
+        for ( XWPFTable table : tables ) {
+            System.out.println( "\t table with position #" + document.getPosOfTable( table ) + " has "
+                    + table.getRows().size() + " rows" );
+        }
+    }
+    
+
+    protected  void removeRow( XWPFDocument document, int tableNumberInDocument,int rowNumber) {
+        List<XWPFTable> tables = document.getTables();
+        XWPFTable theTable = tables.get( tableNumberInDocument );
+        theTable.removeRow(rowNumber);
+    }
 	
 	
 	public void replaceTextInExcel(Workbook doc, String findText, String replaceText) {

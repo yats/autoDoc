@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.springframework.stereotype.Component;
 
 import net.atos.iam.utils.autodoc.common.AutoDocUtils;
@@ -21,6 +23,7 @@ import net.atos.iam.utils.autodoc.common.AutoDocUtils;
 public class LivraisonProdManagement extends AutoDocUtils {
 
 	
+	private static final int DL_TABLEAU_LIVRABLES = 4;
 	private static final String DATE = "{DATE}";
 	private static final String CP_PRESTATAIRE = "{CP_PRESTATAIRE}";
 	private static final String REFERENCE_LIVRAISON = "{REF_LIVRAISON}";
@@ -50,6 +53,23 @@ public class LivraisonProdManagement extends AutoDocUtils {
 	private static final int PARAGRAPH_DEPLOIEMENT_TYPE_3_START = 48;
 	private static final int PARAGRAPH_DEPLOIEMENT_TYPE_3_END = 53;
 	
+	
+	private static final int DL_PARAGRAPH_DEPLOIEMENT_TYPE_1_START = 119;
+	private static final int DL_PARAGRAPH_DEPLOIEMENT_TYPE_1_END = 121;
+	private static final int DL_PARAGRAPH_DEPLOIEMENT_TYPE_2_START = 122;
+	private static final int DL_PARAGRAPH_DEPLOIEMENT_TYPE_2_END = 132;
+	private static final int DL_PARAGRAPH_DEPLOIEMENT_TYPE_3_START = 133;
+	private static final int DL_PARAGRAPH_DEPLOIEMENT_TYPE_3_END = 135;
+	private static final int DL_PARAGRAPH_PATCH_SQL_END = 109;
+	private static final int DL_PARAGRAPH_PATCH_SQL_START = 103;
+	private static final int DL_PARAGRAPH_PATCH_SQL_FIXE_START = 107;
+	private static final int DL_PARAGRAPH_PATCH_SQL_FIXE_END = 107;
+	private static final int DL_PARAGRAPH_PATCH_SQL_MOBILE_START = 108;
+	private static final int DL_PARAGRAPH_PATCH_SQL_MOBILE_END = 108;
+	private static final int DL_PARAGRAPH_DBA_START = 93;
+	private static final int DL_PARAGRAPH_DBA_END = 102;
+	private static final int DL_PARAGRAPH_SYSTEM_START = 89;
+	private static final int DL_PARAGRAPH_SYSTEM_END = 92;
 	/**
 	 * 
 	 * @param doc
@@ -58,25 +78,42 @@ public class LivraisonProdManagement extends AutoDocUtils {
 	
 	
 	public void generateDocument(String referenceLivraison,
-			String versionDocument,String cpPrestataire,List<String> checkedSqlItems,List<String> checkedDbaItems,List<String> checkedSystemItems,String checkedDeploiementItem) throws FileNotFoundException, IOException, URISyntaxException {
+			String versionDocument,String cpPrestataire,List<String> checkedItems,List<String> checkedSqlItems,List<String> checkedDbaItems,List<String> checkedSystemItems,String checkedDeploiementItem) throws FileNotFoundException, IOException, URISyntaxException {
 
 		String formattedDate = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
 		
 		FileUtils.copyDirectory(new File(ClassLoader.getSystemResource(PATCH_SOURCE_FOLDER).toURI()), new File(PATCH_DESTINATION_FOLDER+referenceLivraison));
-		generateManuelSql(referenceLivraison, versionDocument,cpPrestataire, checkedSqlItems, formattedDate);
-		generateSqlFiles(referenceLivraison, checkedSqlItems,cpPrestataire, formattedDate);
 		
-		generateManuelDBA(referenceLivraison, versionDocument);
-		generateDbaFiles(referenceLivraison,cpPrestataire,formattedDate);
-		generateDemandeAcces(referenceLivraison, versionDocument,formattedDate,"Demande_de _droits_accès_Production_GRC_Comptes_nominatifs"); 
-		generateDemandeAcces(referenceLivraison, versionDocument,formattedDate,"Demande_de _droits_accès_Production_GRC_DEPLOY");
-		
-		generateDemandeSystem(referenceLivraison,versionDocument,cpPrestataire,formattedDate,checkedSystemItems);
+		if (null != checkedItems && !checkedItems.contains("SQL")) {
+			FileUtils.deleteQuietly(new File(PATCH_DESTINATION_FOLDER+referenceLivraison+"\\Script"));
+			FileUtils.deleteQuietly(new File(PATCH_DESTINATION_FOLDER+referenceLivraison+"\\Manuel"));
+		} else if (null != checkedItems && checkedItems.contains("SQL")) {
+			generateManuelSql(referenceLivraison, versionDocument,cpPrestataire, checkedSqlItems, formattedDate);
+			generateSqlFiles(referenceLivraison, checkedSqlItems,cpPrestataire, formattedDate);
+		}
+
+		if (null != checkedItems && !checkedItems.contains("DBA")) {
+			FileUtils.deleteQuietly(new File(PATCH_DESTINATION_FOLDER + referenceLivraison + "\\DBA"));
+		} else if (null != checkedItems && checkedItems.contains("DBA")) {
+			generateManuelDBA(referenceLivraison, versionDocument);
+			generateDbaFiles(referenceLivraison,cpPrestataire,formattedDate);
+			generateDemandeAcces(referenceLivraison, versionDocument,formattedDate,"Demande_de _droits_accès_Production_GRC_Comptes_nominatifs"); 
+			generateDemandeAcces(referenceLivraison, versionDocument,formattedDate,"Demande_de _droits_accès_Production_GRC_DEPLOY");
+		}
+
+		if (null != checkedItems && !checkedItems.contains("SYSTEME")) {
+			FileUtils.deleteQuietly(new File(PATCH_DESTINATION_FOLDER+referenceLivraison+"\\GRC_TNT_Configuration_WAS.docx"));
+		} else if (null != checkedItems && checkedItems.contains("SYSTEME")) {
+			generateDemandeSystem(referenceLivraison,versionDocument,cpPrestataire,formattedDate,checkedSystemItems);
+		}
 		
 		generateInstallationManual(referenceLivraison,versionDocument,cpPrestataire,formattedDate,checkedDeploiementItem);
+		generateDossierLivraison(referenceLivraison,versionDocument,formattedDate,checkedItems,checkedSystemItems,checkedSqlItems,checkedDbaItems,checkedDeploiementItem);
 		
 	}
 	
+
+
 	private void generateDbaFiles(String referenceLivraison, String cpPrestataire,String formattedDate) throws IOException {
 		String manuelTmpPath = PATCH_DESTINATION_FOLDER + referenceLivraison + "\\DBA";
 
@@ -147,7 +184,6 @@ public class LivraisonProdManagement extends AutoDocUtils {
 		this.replaceTextFor(doc, CP_PRESTATAIRE, cpPrestataire);
 		this.replaceTextFor(doc, DATE, formattedDate);
 		
-		logParagraphs(doc);		
 		if(null!= checkedItems && !checkedItems.contains("FIXE")) {
 			this.removeParagrahRange(doc, PARAGRAPH_FIXE_START,PARAGRAPH_FIXE_END); 
 		}
@@ -157,7 +193,6 @@ public class LivraisonProdManagement extends AutoDocUtils {
 		}
 		
 		this.createTOC(doc, 38);
-		logParagraphs(doc);
 		this.saveDocument(PATCH_DESTINATION_FOLDER+referenceLivraion+"\\Manuel\\GRC_OPM_Manuel_d_installation_SQL"
 				+ "_" + referenceLivraion + "_V" + versionDocument
 				+ ".docx", doc);
@@ -204,9 +239,6 @@ public class LivraisonProdManagement extends AutoDocUtils {
 		this.replaceTextFor(doc, REFERENCE_LIVRAISON, referenceLivraison);
 		this.replaceTextFor(doc, CP_PRESTATAIRE, cpPrestataire);
 		this.replaceTextFor(doc, DATE, formattedDate);
-	
-		
-		logParagraphs(doc);
 		
 		if (null != checkedSystemItems && !checkedSystemItems.contains("CERTIFICAT_JDK")) {
 			this.removeParagrahRange(doc, PARAGRAPH_CERTIFICAT_JDK_START,
@@ -264,6 +296,63 @@ public class LivraisonProdManagement extends AutoDocUtils {
 				+ ".docx", doc);
 		this.deleteDocument(manuelTmpPath);
 		
+	}
+	
+	private void generateDossierLivraison(String referenceLivraison, String versionDocument, String formattedDate,List<String> checkedItems,
+			List<String> checkedSystemItems, List<String> checkedSqlItems, List<String> checkedDbaItems,
+			String checkedDeploiementItem) throws IOException, FileNotFoundException  
+	{
+		String manuelTmpPath = PATCH_DESTINATION_FOLDER+referenceLivraison+"\\GRC_Dossier-Livraison.docx";
+		XWPFDocument doc = new XWPFDocument(Files.newInputStream(Paths.get(manuelTmpPath)));
+		this.replaceTextFor(doc, REFERENCE_LIVRAISON, referenceLivraison);
+		this.replaceTextFor(doc, DATE, formattedDate);
+		
+		showTablesInfo(doc);
+		
+		if ("ARRET_DEPLOIEMENT_RELANCE_IN_ON_RUN".equals(checkedDeploiementItem)) {
+			this.removeParagrahRange(doc, DL_PARAGRAPH_DEPLOIEMENT_TYPE_3_START,DL_PARAGRAPH_DEPLOIEMENT_TYPE_3_END);
+			this.removeParagrahRange(doc, DL_PARAGRAPH_DEPLOIEMENT_TYPE_2_START,DL_PARAGRAPH_DEPLOIEMENT_TYPE_2_END);
+		}
+		
+		if ("ARRET_DEPLOIEMENT_RELANCE_IN_SEPARATE_RUNS".equals(checkedDeploiementItem)) {
+			this.removeParagrahRange(doc, DL_PARAGRAPH_DEPLOIEMENT_TYPE_3_START,DL_PARAGRAPH_DEPLOIEMENT_TYPE_3_END);
+			this.removeParagrahRange(doc, DL_PARAGRAPH_DEPLOIEMENT_TYPE_1_START,DL_PARAGRAPH_DEPLOIEMENT_TYPE_1_END);
+		}
+		
+		if ("ARRET_RELANCE".equals(checkedDeploiementItem)) {
+			this.removeParagrahRange(doc, DL_PARAGRAPH_DEPLOIEMENT_TYPE_2_START,DL_PARAGRAPH_DEPLOIEMENT_TYPE_2_END);
+			this.removeParagrahRange(doc, DL_PARAGRAPH_DEPLOIEMENT_TYPE_1_START,DL_PARAGRAPH_DEPLOIEMENT_TYPE_1_END);
+		}
+		
+		if (null != checkedItems && !checkedItems.contains("SQL")) {
+			this.removeParagrahRange(doc, DL_PARAGRAPH_PATCH_SQL_START, DL_PARAGRAPH_PATCH_SQL_END);
+			removeRow(doc,DL_TABLEAU_LIVRABLES,5);
+			removeRow(doc,DL_TABLEAU_LIVRABLES,5);
+		} else if (null != checkedItems && checkedItems.contains("SQL")) {
+			if (null != checkedSqlItems && !checkedSqlItems.contains("FIXE")) {
+				this.removeParagrahRange(doc, DL_PARAGRAPH_PATCH_SQL_FIXE_START, DL_PARAGRAPH_PATCH_SQL_FIXE_END);
+				removeRow(doc,DL_TABLEAU_LIVRABLES,5);
+			}
+			if (null != checkedSqlItems && !checkedSqlItems.contains("MOBILE")) {
+				this.removeParagrahRange(doc, DL_PARAGRAPH_PATCH_SQL_MOBILE_START, DL_PARAGRAPH_PATCH_SQL_MOBILE_END);
+				removeRow(doc,DL_TABLEAU_LIVRABLES,6);
+			}
+		}
+
+		if (null != checkedItems && !checkedItems.contains("DBA")) {
+			this.removeParagrahRange(doc, DL_PARAGRAPH_DBA_START, DL_PARAGRAPH_DBA_END);
+			removeRow(doc,DL_TABLEAU_LIVRABLES,3);
+			removeRow(doc,DL_TABLEAU_LIVRABLES,3);
+		} 
+		
+		if (null != checkedItems && !checkedItems.contains("SYSTEME")) {
+			this.removeParagrahRange(doc, DL_PARAGRAPH_SYSTEM_START, DL_PARAGRAPH_SYSTEM_END);
+		} 
+		
+		this.saveDocument(PATCH_DESTINATION_FOLDER+referenceLivraison+"\\GRC_Dossier-Livraison"
+				+ "_" + referenceLivraison + "_V" + versionDocument
+				+ ".docx", doc);
+		this.deleteDocument(manuelTmpPath);
 	}
 
 }

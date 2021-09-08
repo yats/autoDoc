@@ -98,6 +98,11 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 		this.checkBoxList.addItem("DBA",true);
 		this.checkBoxList.addItem("SQL",true);
 		this.checkBoxList.addItem("SYSTEME",true);
+		this.checkedItems = this.checkBoxList.getCheckedItems();
+		this.checkBoxList.addListener((sel, prev) ->
+	    { this.checkedItems = this.checkBoxList.getCheckedItems();
+	       System.out.println(this.checkBoxList);}
+	);
 		this.addComponent(checkBoxList);
 		
 		addPatchSqlPanel();
@@ -173,9 +178,10 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 		this.checkBoxSqlList = new CheckBoxList<String>();
 		this.checkBoxSqlList.addItem("FIXE",true);
 		this.checkBoxSqlList.addItem("MOBILE",true);
+		this.checkedSqlItems = this.checkBoxSqlList.getCheckedItems();
 		this.checkBoxSqlList.addListener((sel, prev) ->
-		    { this.checkedItems = this.checkBoxList.getCheckedItems();
-		       System.out.println(this.getCheckBoxList());}
+		    { this.checkedSqlItems = this.checkBoxSqlList.getCheckedItems();
+		       System.out.println(this.checkedSqlItems);}
 		);
 		
 		patchSqlPanel.addComponent(checkBoxSqlList);
@@ -206,6 +212,7 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 		this.checkBoxSystemList.addItem("CERTIFICAT_WS",true);
 		this.checkBoxSystemList.addItem("BATCH",true);
 		this.checkBoxSystemList.addItem("CERTIFICAT_JDK",true);
+		this.checkedSystemItems = this.checkBoxSystemList.getCheckedItems();
 		this.checkBoxSystemList.addListener((sel, prev) ->
 		    { this.checkedSystemItems = this.checkBoxSystemList.getCheckedItems();}
 		);
@@ -236,6 +243,7 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 		this.checkBoxDbaList = new CheckBoxList<String>();
 		this.checkBoxDbaList.addItem("DEMANDES D'ACCES DEPLOY",true);
 		this.checkBoxDbaList.addItem("DEMANDES D'ACCES NOMINATIFS",true);
+		this.checkedDbaItems = this.checkBoxDbaList.getCheckedItems();
 		this.checkBoxDbaList.addListener((sel, prev) ->
 		    { this.checkedDbaItems = this.checkBoxDbaList.getCheckedItems();}
 		);
@@ -267,6 +275,7 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 		this.checkBoxDeploiementList.addItem("ARRET_DEPLOIEMENT_RELANCE_IN_ON_RUN");
 		this.checkBoxDeploiementList.addItem("ARRET_DEPLOIEMENT_RELANCE_IN_SEPARATE_RUNS");
 		this.checkBoxDeploiementList.addItem("ARRET_RELANCE");
+		this.checkeDeploiementItem = this.checkBoxDeploiementList.getCheckedItem();
 		this.checkBoxDeploiementList.addListener((sel, prev) ->
 		    { this.checkeDeploiementItem = this.checkBoxDeploiementList.getCheckedItem();}
 		);
@@ -279,7 +288,7 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 		
 		try {
 			LivraisonProdManagement docManagement = new LivraisonProdManagement();
-			docManagement.generateDocument(referenceLivraison.getText(), "1.0",prestataire.getText(), this.getCheckedSqlItems(), this.checkedDbaItems, this.checkedSystemItems, this.checkeDeploiementItem);
+			docManagement.generateDocument(referenceLivraison.getText(), "1.0",prestataire.getText(),this.checkedItems,this.checkedSqlItems, this.checkedDbaItems, this.checkedSystemItems, this.checkeDeploiementItem);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 

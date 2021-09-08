@@ -1,11 +1,13 @@
 package net.atos.iam.utils.autodoc;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.BasicWindow;
 import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.ComboBox;
@@ -47,7 +49,7 @@ public class AutoDocApplication {
 			final Window window = new BasicWindow("Formulaire de génération des documents GRC ");
 
 			Panel contentPanel = new Panel(new GridLayout(2));
-
+			contentPanel.setPreferredSize(new TerminalSize(100,100));
 			List<String> listDocuments = DocumentTypes.getEnumDescAsList();
 			contentPanel.addComponent(new Label(DocumentConstantes.TYPE));
 			ComboBox<String> typeDocument = new ComboBox<>(listDocuments);
@@ -76,6 +78,7 @@ public class AutoDocApplication {
 			}).setLayoutData(GridLayout.createHorizontallyEndAlignedLayoutData(2)));
 
 			window.setComponent(contentPanel);
+			window.setHints(Arrays.asList(Window.Hint.FIT_TERMINAL_WINDOW));
 			textGUI.addWindowAndWait(window);
 
 			screen.refresh();

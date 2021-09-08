@@ -13,7 +13,6 @@ import com.googlecode.lanterna.gui2.Separator;
 import com.googlecode.lanterna.gui2.TextBox;
 import com.googlecode.lanterna.gui2.Window;
 
-import net.atos.iam.utils.autodoc.mswordmanagement.FunctionalSpecificationManagement;
 import net.atos.iam.utils.autodoc.mswordmanagement.SpecificationTechniqueWsSoapManagement;
 import net.atos.iam.utils.autodoc.mswordmanagement.constantes.DocumentConstantes;
 import net.atos.iam.utils.autodoc.mswordmanagement.constantes.MTProjectManagers;
@@ -39,8 +38,12 @@ public class SpecificationTechniqueWsSoapPanel extends Panel implements GrcAutoD
 		this.setLayoutManager(new GridLayout(2));
         GridLayout gridLayout = (GridLayout)this.getLayoutManager();
         gridLayout.setHorizontalSpacing(1);
-        Label label = new Label("Specification technique : Modifier le texte en surbrillance sur le document généré");
+        Label label = new Label("Specification technique ");
+        Label label2 = new Label("Modifier le texte en surbrillance ");
+        Label label3 = new Label("sur le document généré ");
         this.addComponent(label);
+        this.addComponent(label2);
+        this.addComponent(label3);
         this.window = window;
 	}
 	
