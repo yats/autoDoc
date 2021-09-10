@@ -8,11 +8,16 @@ import com.googlecode.lanterna.gui2.Direction;
 import com.googlecode.lanterna.gui2.EmptySpace;
 import com.googlecode.lanterna.gui2.GridLayout;
 import com.googlecode.lanterna.gui2.Label;
+import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.gui2.Separator;
 import com.googlecode.lanterna.gui2.TextBox;
 import com.googlecode.lanterna.gui2.Window;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.screen.Screen;
 
+import net.atos.iam.utils.autodoc.common.CheckMandatoryFieldUtils;
 import net.atos.iam.utils.autodoc.mswordmanagement.SpecificationTechniqueWsSoapManagement;
 import net.atos.iam.utils.autodoc.mswordmanagement.constantes.DocumentConstantes;
 import net.atos.iam.utils.autodoc.mswordmanagement.constantes.MTProjectManagers;
@@ -28,13 +33,14 @@ public class SpecificationTechniqueWsSoapPanel extends Panel implements GrcAutoD
 	private CheckBoxList<String> checkBoxList;
 	private List<String> checkedItems;
 	private Window window;
+	private Screen screen;
 	
 	public SpecificationTechniqueWsSoapPanel() {
 		super();
 		
 	}
 	
-	public void init(Window window) {
+	public void init(Window window,Screen screen) {
 		this.setLayoutManager(new GridLayout(2));
         GridLayout gridLayout = (GridLayout)this.getLayoutManager();
         gridLayout.setHorizontalSpacing(1);
@@ -45,6 +51,7 @@ public class SpecificationTechniqueWsSoapPanel extends Panel implements GrcAutoD
         this.addComponent(label2);
         this.addComponent(label3);
         this.window = window;
+        this.screen = screen;
 	}
 	
 	public void addComponents() {
@@ -90,13 +97,27 @@ public class SpecificationTechniqueWsSoapPanel extends Panel implements GrcAutoD
         
 		this.addComponent(new Button("Valider", new Runnable() {
 			public void run() {
-				window.close();
+				if (validateForm()) window.close();
 			}
 		}));
 	}
 	
-	public void validateForm() {
-		// TODO add implementation
+	public boolean validateForm() {
+		 CheckMandatoryFieldUtils test = new CheckMandatoryFieldUtils();
+	        test.isNullOrEmpty(titreDocument.getText(), "Le titre est  obligatoire");
+	        test.isNullOrEmpty(referenceJira.getText(), "La référence JIRA est obligatoire");
+	        test.isNullOrEmpty(nomWebservice.getText(), "Le nom du webservice est obligatoire");
+	        test.isNullOrEmpty(chefProjetSI.getText(), "Le chef de projet SI est obligatoire");
+	        test.isNullOrEmpty(prestataire.getText(), "Le CP prestataire est obligatoire");
+	        
+	        if (!test.isCheckOk()) {
+	        	final WindowBasedTextGUI textGUI = new MultiWindowTextGUI(screen);
+				MessageDialog.showMessageDialog(textGUI, "Validation", test.getMessage().toString());
+				return false;
+	        } else {
+	        	return true;
+	        }
+	       
 	}
 
 

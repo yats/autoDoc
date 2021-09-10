@@ -8,14 +8,18 @@ import com.googlecode.lanterna.gui2.Direction;
 import com.googlecode.lanterna.gui2.EmptySpace;
 import com.googlecode.lanterna.gui2.GridLayout;
 import com.googlecode.lanterna.gui2.Label;
+import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.gui2.RadioBoxList;
 import com.googlecode.lanterna.gui2.Separator;
 import com.googlecode.lanterna.gui2.TextBox;
 import com.googlecode.lanterna.gui2.Window;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.screen.Screen;
 
+import net.atos.iam.utils.autodoc.common.CheckMandatoryFieldUtils;
 import net.atos.iam.utils.autodoc.mswordmanagement.LivraisonProdManagement;
-import net.atos.iam.utils.autodoc.mswordmanagement.PatchSqlManagement;
 import net.atos.iam.utils.autodoc.mswordmanagement.constantes.DocumentConstantes;
 import net.atos.iam.utils.autodoc.mswordmanagement.constantes.PrestataireManager;
 
@@ -23,7 +27,6 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 
 	
 	private CheckBoxList<String> checkBoxList;
-	private ComboBox<String> typeDocument;
 	private TextBox titreDocument;
 	private TextBox referenceLivraison;
 	private TextBox versionDocument;
@@ -48,6 +51,7 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 	
 	
 	private Window window;
+	private Screen screen;
 	
 	public LivraisonProdPanel() {
 		super();
@@ -55,13 +59,14 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 	}
 	
 	
-	public void init(Window window) {
+	public void init(Window window,Screen screen) {
 		this.setLayoutManager(new GridLayout(2));
         GridLayout gridLayout = (GridLayout)this.getLayoutManager();
         gridLayout.setHorizontalSpacing(1);
         Label label = new Label("Livraison production");
         this.addComponent(label);
         this.window = window;
+        this.screen = screen;
 	}
 	
 	public void addComponents() {
@@ -80,8 +85,6 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
         referenceLivraison.setLayoutData(GridLayout.createHorizontallyFilledLayoutData(1));
 		this.addComponent(new Label(DocumentConstantes.REFERENCE_LIVRAISON));
 		this.addComponent(referenceLivraison);
-		
-		
 		
 		this.addComponent(
                 new Separator(Direction.HORIZONTAL)
@@ -123,7 +126,7 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
         
 		this.addComponent(new Button("Valider", new Runnable() {
 			public void run() {
-				window.close();
+				if (validateForm()) window.close();
 			}
 		}));
 		
@@ -294,9 +297,28 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 		} 
 	}
 	
-	public void validateForm() {
-		// TODO add implementation
+	public boolean validateForm() {
+		 CheckMandatoryFieldUtils test = new CheckMandatoryFieldUtils();
+			test.isNullOrEmpty(referenceLivraison.getText(), "La référence de la livraison est obligatoire");
+			test.isNullOrEmpty(prestataire.getText(), "Le prestataire est obligatoire");
+			test.isNullOrEmpty(checkeDeploiementItem, "Selectionner au moins un mode de déploiement");
+			if (null != checkedItems && checkedItems.contains("SQL")) {
+				test.isListEmpty(checkedSqlItems, "Selectionner au moins un produit pour les patchs SQL");	
+			}
+			if (null != checkedItems && checkedItems.contains("SYSTEME")) {
+				test.isListEmpty(checkedSystemItems, "Selectionner au moins un champ système");	
+			}
+
+			if (!test.isCheckOk()) {
+				final WindowBasedTextGUI textGUI = new MultiWindowTextGUI(screen);
+				MessageDialog.showMessageDialog(textGUI, "Validation", test.getMessage().toString());
+				return false;
+			} else {
+				return true;
+			}
+		   
 	}
+
 	
 
 
@@ -307,16 +329,6 @@ public class LivraisonProdPanel extends Panel implements GrcAutoDocPanel {
 
 	public void setCheckBoxList(CheckBoxList<String> checkBoxList) {
 		this.checkBoxList = checkBoxList;
-	}
-
-
-	public ComboBox<String> getTypeDocument() {
-		return typeDocument;
-	}
-
-
-	public void setTypeDocument(ComboBox<String> typeDocument) {
-		this.typeDocument = typeDocument;
 	}
 
 

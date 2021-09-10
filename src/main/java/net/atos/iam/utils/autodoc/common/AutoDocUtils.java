@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSimpleField;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STOnOff;
@@ -25,7 +27,7 @@ import com.aspose.cells.Workbook;
 public class AutoDocUtils {
 	
 	static Logger log = Logger.getLogger(AutoDocUtils.class.getName());
-
+	
 	public void logParagraphs(XWPFDocument doc) {
 		doc.getParagraphs().forEach(p -> {
 			System.out.println("###########################################");

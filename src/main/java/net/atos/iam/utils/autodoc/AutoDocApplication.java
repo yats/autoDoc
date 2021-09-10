@@ -1,8 +1,13 @@
 package net.atos.iam.utils.autodoc;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -26,6 +31,7 @@ import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
+import net.atos.iam.utils.autodoc.common.AutoDocUtils;
 import net.atos.iam.utils.autodoc.mswordmanagement.constantes.DocumentConstantes;
 import net.atos.iam.utils.autodoc.mswordmanagement.constantes.DocumentTypes;
 import net.atos.iam.utils.layout.GrcAutoDocPanel;
@@ -35,11 +41,22 @@ public class AutoDocApplication {
 	
 	static Logger log = Logger.getLogger(AutoDocApplication.class.getName());
 
+	static Terminal terminal = null;
+	static Screen screen = null;
+	private static final String TMP_PATH = "C:\\tmp";
+	private static final Path TMP_FOLDER = Paths.get(TMP_PATH);
+	private static final Path TMP_LIV_PROD_FOLDER = Paths.get(TMP_PATH+"\\livraisonProd");
+	private static final Path TMP_PATCH_SQLFOLDER = Paths.get(TMP_PATH+"\\patchSql");
+	
+	
 	public static void main(String[] args) {
 		DefaultTerminalFactory defaultTerminalFactory = new DefaultTerminalFactory();
-		Terminal terminal = null;
-		Screen screen = null;
+		
 		try {
+			if(!Files.exists(TMP_FOLDER)) Files.createDirectory(TMP_FOLDER);
+			if(!Files.exists(TMP_LIV_PROD_FOLDER)) Files.createDirectory(TMP_LIV_PROD_FOLDER);
+			if(!Files.exists(TMP_PATCH_SQLFOLDER)) Files.createDirectory(TMP_PATCH_SQLFOLDER);
+			
 			terminal = defaultTerminalFactory.createTerminal();
 			screen = new TerminalScreen(terminal);
 			screen.startScreen();
@@ -64,7 +81,7 @@ public class AutoDocApplication {
 				public void run() {
 					
 					GrcAutoDocPanel panel = new GrcAutoDocPanelFactory().createPanel(typeDocument.getText());
-					panel.init(window);
+					panel.init(window,screen);
 					panel.addComponents();
 					window.setComponent((Component) panel);
 					textGUI.addWindowAndWait(window);
